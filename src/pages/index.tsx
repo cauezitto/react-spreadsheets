@@ -8,10 +8,10 @@ import { Root } from "@/types/sheet";
 export const getServerSideProps = (async () => {
   try {
     const auth: Auth.GoogleAuth = new google.auth.GoogleAuth({
-      scopes: [process.env.SCOPES!],
+      scopes: [process.env.SCOPES_SHEETS!],
       credentials: {
-        type: process.env.TYPE!,
-        private_key: process.env.PRIVATE_KEY!,
+        type: process.env.TYPE_GOOGLE!,
+        private_key: process.env.PRIVATE_KEY_SHEETS!,
         client_email: process.env.CLIENT_EMAIL!,
         client_id: process.env.CLIENT_ID!,
 

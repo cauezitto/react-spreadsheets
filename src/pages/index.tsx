@@ -120,7 +120,7 @@ const App = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
                 value: formattedValue,
                 className: classes,
                 // readOnly: true,
-                DataViewer: (cell: CellBase) => (
+                DataViewer: () => (
                   <div
                     onClick={() => {
                       console.log(value.effectiveFormat);

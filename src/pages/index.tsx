@@ -38,6 +38,7 @@ export const getServerSideProps = (async () => {
     return { props: { sheet_info: sheet.data } };
   } catch (err) {
     console.log(process.env);
+    console.log(err);
     return { props: { sheet_info: undefined } };
   }
 }) satisfies GetServerSideProps<{ sheet_info?: sheets_v4.Schema$Spreadsheet }>;

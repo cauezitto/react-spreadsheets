@@ -6,46 +6,41 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { Root } from "@/types/sheet";
 
 export const getServerSideProps = (async () => {
-  const auth: Auth.GoogleAuth = new google.auth.GoogleAuth({
-    scopes: [process.env.SCOPES!],
-    credentials: {
-      type: process.env.TYPE!,
-      private_key: process.env.PRIVATE_KEY!,
-      client_email: process.env.CLIENT_EMAIL!,
-      client_id: process.env.CLIENT_ID!,
+  try {
+    const auth: Auth.GoogleAuth = new google.auth.GoogleAuth({
+      scopes: [process.env.SCOPES!],
+      credentials: {
+        type: process.env.TYPE!,
+        private_key: process.env.PRIVATE_KEY!,
+        client_email: process.env.CLIENT_EMAIL!,
+        client_id: process.env.CLIENT_ID!,
 
-      token_info_url: process.env.TOKEN_INFO_URL!,
-      token_url: process.env.TOKEN_URL!,
-    },
-  });
+        token_info_url: process.env.TOKEN_INFO_URL!,
+        token_url: process.env.TOKEN_URL!,
+      },
+    });
 
-  const spreadsheetId = process.env.SPREADSHEET_ID!;
+    const spreadsheetId = process.env.SPREADSHEET_ID!;
 
-  const googleSheets = google.sheets({
-    version: "v4",
-    auth,
-  });
+    const googleSheets = google.sheets({
+      version: "v4",
+      auth,
+    });
 
-  const sheet = await googleSheets.spreadsheets.get({
-    auth,
-    spreadsheetId,
-    ranges: ["Planilha1"],
-    includeGridData: true,
-    prettyPrint: true,
-  });
+    const sheet = await googleSheets.spreadsheets.get({
+      auth,
+      spreadsheetId,
+      ranges: ["Planilha1"],
+      includeGridData: true,
+      prettyPrint: true,
+    });
 
-  // sheet.data.sheets?.map((sheet) =>
-  //   sheet.data?.map((data) =>
-  //     data.rowData?.map((row_data) =>
-  //       row_data.values?.map((value) => {
-  //         if (value?.effectiveFormat) console.debug(value?.effectiveFormat);
-  //       })
-  //     )
-  //   )
-  // );
-
-  return { props: { sheet_info: sheet.data } };
-}) satisfies GetServerSideProps<{ sheet_info: sheets_v4.Schema$Spreadsheet }>;
+    return { props: { sheet_info: sheet.data } };
+  } catch (err) {
+    console.log(process.env);
+    return { props: { sheet_info: undefined } };
+  }
+}) satisfies GetServerSideProps<{ sheet_info?: sheets_v4.Schema$Spreadsheet }>;
 
 const App = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [data, setData] = useState<Matrix<CellBase<any>>>([]);

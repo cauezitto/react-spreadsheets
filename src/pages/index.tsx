@@ -34,18 +34,47 @@ export const getServerSideProps = (async () => {
     prettyPrint: true,
   });
 
+  // sheet.data.sheets?.map((sheet) =>
+  //   sheet.data?.map((data) =>
+  //     data.rowData?.map((row_data) =>
+  //       row_data.values?.map((value) => {
+  //         if (value?.effectiveFormat) console.debug(value?.effectiveFormat);
+  //       })
+  //     )
+  //   )
+  // );
+
   return { props: { sheet_info: sheet.data } };
 }) satisfies GetServerSideProps<{ sheet_info: sheets_v4.Schema$Spreadsheet }>;
 
 const App = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const [data, setData] = useState<Matrix<CellBase<unknown>>>([]);
+  const [data, setData] = useState<Matrix<CellBase<any>>>([]);
+
+  function rgbToHex(rgbString: string) {
+    // Remove "rgb(" e ")" e divide os valores separados por vírgula
+    const rgbValues = rgbString
+      .replace("rgb(", "")
+      .replace(")", "")
+      .split(",")
+      .map(Number); // Converte para número
+
+    // Converte os valores RGB de 0-1 para 0-255
+    const r = Math.round(rgbValues[0] * 255);
+    const g = Math.round(rgbValues[1] * 255);
+    const b = Math.round(rgbValues[2] * 255);
+
+    // Converte cada valor em hexadecimal
+    const hex = (n: number) => n.toString(16).padStart(2, "0");
+
+    return `#${hex(r)}${hex(g)}${hex(b)}`;
+  }
 
   useEffect(() => {
     const load_data = async () => {
       if (!props.sheet_info) return;
       const sheetData: Root = props as Root;
       if (!sheetData) console.log(sheetData, "props");
-      const matrixData = sheetData.sheet_info.sheets[0].data
+      const matrixData: any = sheetData.sheet_info.sheets[0].data
         .map((daum) =>
           daum.rowData.map((row) =>
             row.values.map((value) => {
@@ -57,17 +86,54 @@ const App = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
               const border_left = value.effectiveFormat?.borders?.left?.style;
               const border_right = value.effectiveFormat?.borders?.right?.style;
               const border_top = value.effectiveFormat?.borders?.top?.style;
+              const text_align = value.effectiveFormat?.horizontalAlignment;
+
+              const rgb_color = value.effectiveFormat?.textFormat
+                ?.foregroundColorStyle?.rgbColor?.red
+                ? value.effectiveFormat?.textFormat?.foregroundColorStyle
+                    ?.rgbColor
+                : null;
+
+              const bold_style = value.effectiveFormat?.textFormat.bold;
 
               const classes = `${
                 border_bottom ? styles.stroke_on_bottom : " "
               }  ${border_left ? styles.stroke_on_left : " "}  ${
                 border_right ? styles.stroke_on_right : " "
-              }   ${border_top ? styles.stroke_on_top : " "}`;
+              }   ${border_top ? styles.stroke_on_top : " "}  ${
+                text_align === "CENTER" ? styles.text_align_center : ""
+              }`;
+
+              const color = rgb_color
+                ? rgbToHex(
+                    `rgb(${rgb_color.red ? rgb_color.red : 0}, ${
+                      rgb_color.green ? rgb_color.green : 0
+                    }, ${rgb_color.blue ? rgb_color.blue : 0})`
+                  )
+                : "#000";
+
+              // console.log(color);
+
+              if (formattedValue == "") console.log(value);
 
               return {
                 value: formattedValue,
                 className: classes,
-                readOnly: true,
+                // readOnly: true,
+                DataViewer: (cell: CellBase) => (
+                  <div
+                    onClick={() => {
+                      console.log(value.effectiveFormat);
+                    }}
+                    style={{
+                      color,
+                      fontWeight: bold_style ? "bold" : undefined,
+                      fontFamily: "Calibri",
+                    }}
+                  >
+                    {formattedValue}
+                  </div>
+                ),
               };
             })
           )

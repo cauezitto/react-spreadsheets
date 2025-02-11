@@ -8,19 +8,18 @@ import { Root } from "@/types/sheet";
 export const getServerSideProps = (async () => {
   try {
     const auth: Auth.GoogleAuth = new google.auth.GoogleAuth({
-      scopes: [process.env.SCOPES_SHEETS!],
+      scopes: [process.env.NEXT_PUBLIC_SCOPES_SHEETS!],
       credentials: {
-        type: process.env.TYPE_GOOGLE!,
-        private_key: process.env.PRIVATE_KEY_SHEETS!,
-        client_email: process.env.CLIENT_EMAIL!,
-        client_id: process.env.CLIENT_ID!,
-
-        token_info_url: process.env.TOKEN_INFO_URL!,
-        token_url: process.env.TOKEN_URL!,
+        type: process.env.NEXT_PUBLIC_TYPE_GOOGLE!,
+        private_key: process.env.NEXT_PUBLIC_PRIVATE_KEY_SHEETS!,
+        client_email: process.env.NEXT_PUBLIC_CLIENT_EMAIL!,
+        client_id: process.env.NEXT_PUBLIC_CLIENT_ID!,
+        token_info_url: process.env.NEXT_PUBLIC_TOKEN_INFO_URL!,
+        token_url: process.env.NEXT_PUBLIC_TOKEN_URL!,
       },
     });
 
-    const spreadsheetId = process.env.SPREADSHEET_ID!;
+    const spreadsheetId = process.env.NEXT_PUBLIC_SPREADSHEET_ID!;
 
     const googleSheets = google.sheets({
       version: "v4",
@@ -37,9 +36,9 @@ export const getServerSideProps = (async () => {
 
     return { props: { sheet_info: sheet.data } };
   } catch (err) {
-    console.log(process.env);
+    // console.log(process.env);
     console.log(err);
-    return { props: { sheet_info: undefined } };
+    return { props: {} };
   }
 }) satisfies GetServerSideProps<{ sheet_info?: sheets_v4.Schema$Spreadsheet }>;
 

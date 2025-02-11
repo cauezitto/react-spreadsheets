@@ -139,7 +139,7 @@ const App = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     };
 
     load_data();
-  }, []);
+  }, [null]);
 
   return (
     <div>

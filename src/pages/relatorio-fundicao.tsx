@@ -1,9 +1,7 @@
-import React, { useState, useRef } from "react";
-import Spreadsheet, { CellBase, Matrix } from "react-spreadsheet";
+import React, { useRef } from "react";
+import Spreadsheet from "react-spreadsheet";
 import api from "@/services/api";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
-import { saveAs } from "file-saver";
-import { json } from "stream/consumers";
 
 export const getServerSideProps = async () => {
   try {
@@ -21,19 +19,18 @@ export const getServerSideProps = async () => {
 
 const App = (props: any) => {
   const { relatorio } = props;
-  const [data, setData] = useState<Matrix<CellBase<any>>>([]);
   const printRef = useRef<HTMLDivElement>(null);
 
-  const generatePDF = async (jsonData: Object[]) => {
+  const generatePDF = async (jsonData: any) => {
     const pdfDoc = await PDFDocument.create();
     let page = pdfDoc.addPage([842, 595]); // Tamanho A4 Paisagem
-    const { width, height } = page.getSize();
+    const { height } = page.getSize();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
     let x = 40;
     let y = height - 40;
     const margin = 40; // Margem
-    const pageHeight = height; // Altura da página
+    // const pageHeight = height;
     const rowHeight = 30; // Distância entre linhas de texto
 
     // Título
@@ -41,7 +38,7 @@ const App = (props: any) => {
     y -= 30;
 
     // Cabeçalhos
-    headers.forEach((header, i) => {
+    headers.forEach((header) => {
       page.drawText(header, {
         x: x,
         y: y,
@@ -85,7 +82,7 @@ const App = (props: any) => {
         if (y - rowHeight < margin) {
           // Adiciona uma nova página
           page = pdfDoc.addPage([842, 595]);
-          const { width, height } = page.getSize(); // Pega o tamanho da nova página
+          const { height } = page.getSize(); // Pega o tamanho da nova página
           y = height - margin; // Reinicia a posição y na parte superior
         }
 
@@ -101,7 +98,7 @@ const App = (props: any) => {
             if (y - rowHeight < margin) {
               // Adiciona uma nova página
               page = pdfDoc.addPage([842, 595]);
-              const { width, height } = page.getSize(); // Pega o tamanho da nova página
+              const { height } = page.getSize(); // Pega o tamanho da nova página
               y = height - margin; // Reinicia a posição y na parte superior
             }
 
@@ -132,23 +129,12 @@ const App = (props: any) => {
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
 
     // Baixar o arquivo
-    const fileName = "planilha_exportada.pdf";
+    // const fileName = "planilha_exportada.pdf";
     // saveAs(blob, fileName);
 
     // Abrir caixa de diálogo de impressão
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
-  };
-  const handlePrint = () => {
-    if (printRef.current) {
-      const originalContents = document.body.innerHTML;
-      const printContents = printRef.current.innerHTML;
-
-      document.body.innerHTML = printContents;
-      window.print();
-      document.body.innerHTML = originalContents;
-      window.location.reload(); // Recarrega a página para restaurar a interface
-    }
   };
 
   // Definir a nova ordem dos cabeçalhos
@@ -173,25 +159,6 @@ const App = (props: any) => {
       headers.map((header) => ({ value: item[header] }))
     ),
   ];
-
-  function rgbToHex(rgbString: string) {
-    // Remove "rgb(" e ")" e divide os valores separados por vírgula
-    const rgbValues = rgbString
-      .replace("rgb(", "")
-      .replace(")", "")
-      .split(",")
-      .map(Number); // Converte para número
-
-    // Converte os valores RGB de 0-1 para 0-255
-    const r = Math.round(rgbValues[0] * 255);
-    const g = Math.round(rgbValues[1] * 255);
-    const b = Math.round(rgbValues[2] * 255);
-
-    // Converte cada valor em hexadecimal
-    const hex = (n: number) => n.toString(16).padStart(2, "0");
-
-    return `#${hex(r)}${hex(g)}${hex(b)}`;
-  }
 
   return (
     <div>
